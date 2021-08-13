@@ -48,55 +48,12 @@ internal object Capes : Module(
     private val capeUsers = HashMap<UUID, Cape>().synchronized()
 
     var updated = false; private set
-    var isPremium = false; private set
+    var isPremium = true; private set
 
     private val gson = Gson()
     private val type = TypeToken.getArray(CapeUser::class.java).type
 
-    init {
-        onEnable {
-            defaultScope.launch {
-                updateCapes()
-            }
-        }
-
-        BackgroundScope.launchLooping("Cape", 300000L) {
-            updateCapes()
-        }
-    }
-
-    private suspend fun updateCapes() {
-        val rawJson = withContext(Dispatchers.IO) {
-            ConnectionUtils.requestRawJsonFrom(KamiMod.CAPES_JSON) {
-                KamiMod.LOG.warn("Failed requesting capes", it)
-            }
-        } ?: return
-
-        try {
-            var capeType: CapeType? = null
-            val cacheList = gson.fromJson<Array<CapeUser>>(rawJson, type)
-            capeUsers.clear()
-
-            cacheList.forEach { capeUser ->
-                capeUser.capes.forEach { cape ->
-                    cape.playerUUID?.let {
-                        capeUsers[it] = cape
-                        if (it == mc.session.profile.id) { // if any of the capeUser's capes match current UUID
-                            isPremium = isPremium || capeUser.isPremium // || is to prevent bug if there is somehow a duplicate capeUser
-                            capeType = cape.type
-                        }
-                    }
-                }
-            }
-
-            updated = true
-            WaterMark.visible = WaterMark.visible
-            DiscordRPC.setCustomIcons(capeType)
-            KamiMod.LOG.info("Capes loaded")
-        } catch (e: Exception) {
-            KamiMod.LOG.warn("Failed parsing capes", e)
-        }
-    }
+    init {}
 
     fun tryRenderCape(playerRenderer: RenderPlayer, player: AbstractClientPlayer, partialTicks: Float): Boolean {
         if (isDisabled
