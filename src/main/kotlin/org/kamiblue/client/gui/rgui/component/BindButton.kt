@@ -26,7 +26,7 @@ class BindButton(
         super.onKeyInput(keyCode, keyState)
         if (listening && !keyState) {
             setting.value.apply {
-                if (keyCode == Keyboard.KEY_BACK || keyCode == Keyboard.KEY_DELETE) clear()
+                if (keyCode == Keyboard.KEY_DELETE) clear()
                 else setBind(keyCode)
                 listening = false
             }
